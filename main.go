@@ -62,7 +62,17 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(singleTodo)
 		}
 	}
+}
 
+func deleteTodo(w http.ResponseWriter, r *http.Request) {
+	todoId := mux.Vars(r)["id"]
+
+	for i, todo := range todos {
+		if todo.ID == todoId {
+			todos = append(todos[:i], todos[i+1:]...)
+			fmt.Fprintf(w, "Todo with ID %v has been deleted successfully", todoId)
+		}
+	}
 }
 
 func main() {
@@ -72,6 +82,7 @@ func main() {
 	router.HandleFunc("/todos", getTodos).Methods("GET")
 	router.HandleFunc("/todos/{id}", getOneTodo).Methods("GET")
 	router.HandleFunc("/todos/{id}", updateTodo).Methods("POST")
+	router.HandleFunc("/todos/{id}", deleteTodo).Methods("DELETE")
 	fmt.Println("Starting server at :7070")
 	log.Fatal(http.ListenAndServe(":7070", router))
 }
