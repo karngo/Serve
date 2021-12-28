@@ -42,12 +42,36 @@ func getOneTodo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func updateTodo(w http.ResponseWriter, r *http.Request) {
+	reqBody, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		fmt.Fprintf(w, "Kindly enter data with the todo title and description only in order to update")
+	}
+
+	todoId := mux.Vars(r)["id"]
+	var updateTodo todo
+
+	json.Unmarshal(reqBody, &updateTodo)
+
+	for i, singleTodo := range todos {
+		if singleTodo.ID == todoId {
+			singleTodo.Title = updateTodo.Title
+			singleTodo.Description = updateTodo.Description
+			todos[i] = singleTodo
+			json.NewEncoder(w).Encode(singleTodo)
+		}
+	}
+
+}
+
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/todos", createTodo).Methods("POST")
 	router.HandleFunc("/todos", getTodos).Methods("GET")
 	router.HandleFunc("/todos/{id}", getOneTodo).Methods("GET")
+	router.HandleFunc("/todos/{id}", updateTodo).Methods("POST")
 	fmt.Println("Starting server at :7070")
 	log.Fatal(http.ListenAndServe(":7070", router))
 }
