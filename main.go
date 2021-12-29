@@ -22,7 +22,12 @@ func createTodo(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Kindly enter data with the todo title and description only in order to update")
 	}
 
-	json.Unmarshal(reqBody, &newTodo)
+	error := json.Unmarshal(reqBody, &newTodo)
+
+	if error != nil {
+		fmt.Fprintf(w, "Invalid data format")
+	}
+
 	todos = append(todos, newTodo)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(newTodo)
@@ -52,7 +57,11 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 	todoId := mux.Vars(r)["id"]
 	var updateTodo todo
 
-	json.Unmarshal(reqBody, &updateTodo)
+	error := json.Unmarshal(reqBody, &updateTodo)
+
+	if error != nil {
+		fmt.Fprintf(w, "Invalid data format")
+	}
 
 	for i, singleTodo := range todos {
 		if singleTodo.ID == todoId {
